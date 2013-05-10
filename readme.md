@@ -1,9 +1,11 @@
 Gravity Forms Highrise CRM
 ==========================
 
-Version 0.1
+Version 0.6
 
 WordPress plugin to link Gravity Forms with Highrise.
+
+Map your Gravity Forms fields to specific Highrise fields, including custom fields. 
 
 ## Requirements
 * Highrise account - [Sign up for a free account](https://signup.37signals.com/highrise/Free/signup/new)
@@ -18,6 +20,10 @@ WordPress plugin to link Gravity Forms with Highrise.
 4. Navigate to Forms->Convio to setup limit feeds for the desired quantity fields
 
 ## Changelog
+
+### 0.6
+* Added note for contact creation in Highrise
+* Found a much cooler version number
 
 ### 0.1 
 * Initial release
