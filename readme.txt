@@ -4,7 +4,7 @@ Donate link:
 Tags: gravity forms, gravityforms, highrise crm, highrise
 Requires at least: 3.3
 Tested up to: 3.5.1
-Stable tag: 0.6
+Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,11 @@ Send your Gravity Forms submissions to Highrise
 
 Send your Gravity Forms submissions to Highrise. 
 
-Map your Gravity Forms fields to specific Highrise fields, including custom fields.
+You choose which of your Gravity Forms fieds go where in Highrise. This includes any custom fields you may have setup as well. 
+
+If you'd like to include preset data into a field for Highrise, create a hidden field with the desired value in Gravity Forms.
+
+Duplicate entries can either be skipped or added as a duplicate. This option is set via the feed for each form. Dupicates are determined by the email address being used for the contact.
 
 == Installation ==
 
@@ -25,9 +29,21 @@ Map your Gravity Forms fields to specific Highrise fields, including custom fiel
 
 == Frequently asked questions ==
 
+= What location is set for my contacts? =
+
+All contacts are currently set to the 'Work' location when being sent to Highrise.
+
+= What is Address (Full)? =
+
+Address (Full) is the field of type Address under Advanced Fields. This field contains all the address information you'll need and makes things much simpler.
+
 == Screenshots ==
 
 == Changelog ==
+
+### 1.0 
+* Code cleanup
+* Add to WordPress Plugin Repository
 
 ### 0.6
 * Added note for contact creation in Highrise

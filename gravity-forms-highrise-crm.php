@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 0.6
+Version: 1.0
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -23,6 +23,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+TODO:
+
+* Add contact locations as groups, address/phone/email/etc as one block
+* Possibilty of tasks
+
 */
 
 add_action('init',  array('GFHighriseCRM', 'init'));
@@ -532,7 +539,7 @@ class GFHighriseCRM {
         <div class="wrap">
             <h2><?php _e("Highrise CRM Feed", "gravity-forms-highrise-crm") ?></h2>
         <?php
-		//getting Highrise API
+		//get Highrise API
 		$api = self::get_api();
 
 		//ensures valid credentials were entered in the settings page
@@ -1150,10 +1157,6 @@ class GFHighriseCRM {
 	// Magic goes here
 	public static function export_feed($entry, $form, $feed, $api){
 
-		//$double_optin = $feed["meta"]["double_optin"] ? true : false;
-		//$send_welcome = $feed["meta"]["welcome_email"] ? true : false;
-		//$email_field_id = $feed["meta"]["field_map"]["cons_email"];
-
 		// Build parameter list of questions and values
 		$params = array(
 			'contact_type' => $feed['meta']['contact_type'],
@@ -1251,7 +1254,7 @@ class GFHighriseCRM {
 					$person->addAddress($address);
 					break;
 
-					// These should all be custom fields
+				// These should all be custom fields
 				default:
 					if( is_int($field) )
 					{

@@ -1,11 +1,15 @@
 Gravity Forms Highrise CRM
 ==========================
 
-Version 0.6
+Version 1.0
 
-WordPress plugin to link Gravity Forms with Highrise.
+Send your Gravity Forms submissions to Highrise. 
 
-Map your Gravity Forms fields to specific Highrise fields, including custom fields. 
+You choose which of your Gravity Forms fieds go where in Highrise. This includes any custom fields you may have setup as well. 
+
+If you'd like to include preset data into a field for Highrise, create a hidden field with the desired value in Gravity Forms.
+
+Duplicate entries can either be skipped or added as a duplicate. This option is set via the feed for each form. Dupicates are determined by the email address being used for the contact.
 
 ## Requirements
 * Highrise account - [Sign up for a free account](https://signup.37signals.com/highrise/Free/signup/new)
@@ -15,11 +19,15 @@ Map your Gravity Forms fields to specific Highrise fields, including custom fiel
 
 ## Installation
 1. Install as a regular WordPress plugin
-2. Create a form with the appropriate fields for your survey
-3. Input Convio Open API credentials at Forms->Settings->Convio
-4. Navigate to Forms->Convio to setup limit feeds for the desired quantity fields
+3. Create a form with Gravity Forms
+4. Input Highrise credentials at Forms->Settings->Highrise CRM
+5. Navigate to Forms->Highrise CRM to setup feeds for the desired forms
 
 ## Changelog
+
+### 1.0 
+* Code cleanup
+* Add to WordPress Plugin Repository
 
 ### 0.6
 * Added note for contact creation in Highrise
