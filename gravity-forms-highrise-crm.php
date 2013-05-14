@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 1.0
+Version: 1.1
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -40,7 +40,7 @@ class GFHighriseCRM {
 	private static $path = "gravity-forms-highrise-crm/gravity-forms-highrise-crm.php";
 	private static $url = "http://www.gravityforms.com";
 	private static $slug = "gravity-forms-highrise-crm";
-	private static $version = "0.6";
+	private static $version = "1.1";
 	private static $min_gravityforms_version = "1.5";
 	private static $supported_fields = array(
 		"checkbox", "radio", "select", "text", "website", "textarea", "email",
@@ -176,6 +176,7 @@ class GFHighriseCRM {
 			"highrise_map_fields" => "<h6>" . __("Map Fields", "gravity-forms-highrise-crm") . "</h6>" . __("Associate your Highrise fields to the appropriate Gravity Form fields by selecting.", "gravity-forms-highrise-crm"),
 			"highrise_optin_condition" => "<h6>" . __("Opt-In Condition", "gravity-forms-highrise-crm") . "</h6>" . __("When the opt-in condition is enabled, form submissions will only be exported to Highrise when the condition is met. When disabled all form submissions will be exported.", "gravity-forms-highrise-crm"),
 			"highrise_duplicates" => "<h6>" . __("Duplicate Entires", "gravity-forms-highrise-crm") . "</h6>" . __("When a duplicate entry for Highrise is detected, what should happen?", "gravity-forms-highrise-crm"),
+			"highrise_note" => "<h6>" . __("Add a Note", "gravity-forms-highrise-crm") . "</h6>" . __("Create a custom note to be added to the contact."),
 		);
 		return array_merge($tooltips, $highrise_tooltips);
 	}
@@ -524,7 +525,7 @@ class GFHighriseCRM {
          	.highrise_col_heading{padding-bottom:2px; border-bottom: 1px solid #ccc; font-weight:bold;}
             .highrise_field_cell {padding: 6px 17px 0 0; margin-right:15px;}
             .gfield_required{color:red;}
-
+            p.description { margin-left: 200px !important;}
             .feeds_validation_error{ background-color:#FFDFDF;}
             .feeds_validation_error td{ margin-top:4px; margin-bottom:6px; padding-top:6px; padding-bottom:6px; border-top:1px dotted #C89797; border-bottom:1px dotted #C89797}
 
@@ -555,7 +556,9 @@ class GFHighriseCRM {
 		$config = empty($id) ? array("meta" => array("double_optin" => true), "is_active" => true) : GFHighriseCRMData::get_feed($id);
 
 		if(!isset($config["meta"]))
-			$config["meta"] = array();
+			$config["meta"] = array(
+				'note'=>''
+			);
 
 		//self::log_debug('Meta: '.print_r($config['meta'], true));
 
@@ -603,14 +606,12 @@ class GFHighriseCRM {
 			}
 
 			$config["meta"]["field_map"] = $field_map;
-			$config["meta"]["double_optin"] = rgpost("highrise_double_optin") ? true : false;
-			$config["meta"]["welcome_email"] = rgpost("highrise_welcome_email") ? true : false;
-
 			$config["meta"]["optin_enabled"] = rgpost("highrise_optin_enable") ? true : false;
 			$config["meta"]["optin_field_id"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_field_id") : "";
 			$config["meta"]["optin_operator"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_operator") : "";
 			$config["meta"]["optin_value"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_value") : "";
 			$config["meta"]["duplicates"] = rgpost("highrise_duplicates");
+			$config["meta"]["note"] = rgpost("highrise_note");
 
 			if($is_valid){
 				$id = GFHighriseCRMData::update_feed($id, $config["form_id"], $config["is_active"], $config["meta"]);
@@ -680,13 +681,23 @@ class GFHighriseCRM {
 ?>
                     </div>
                 </div>
+
+				<div class="margin_vertical_10">
+					<label class="left_header"><?php _e( 'Add a Note', 'gravity-forms-highrise-crm' ); ?> <?php gform_tooltip('highrise_note') ?></label>
+	
+					<div id="form_fields">
+						<input type="text" name="highrise_note" value="<?php echo isset($config['meta']['note']) ? $config['meta']['note'] : ''; ?>" class="regular-text"/>
+						<p class="description">Use <em>{formurl}</em> to display the form URL and <em>{ipaddress}</em> to display users IP address. If the field is empty, no note will be sent.</p>
+					</div>
+				</div>
+
                 <div id="highrise_duplicate_container" valign="top" class="margin_vertical_10">
                 	<label for="highrise_duplicates" class="left_header"><?php _e("Duplicate entries?", "gravity-forms-highrise-crm") ?><?php gform_tooltip("highrise_duplicates") ?></label>
                 	<select name="highrise_duplicates" id="highrise_duplicates">
                 		<option value="dupe" <?php echo 'selected' ? (isset($config['meta']['duplicates']) &&$config['meta']['duplicates'] == 'dupe') : '' ?>>Add duplicate anyways, and I'll deal with it in Highrise</option>
 	                	<option value="ignore" <?php echo 'selected' ? (isset($config['meta']['duplicates']) &&$config['meta']['duplicates'] == 'ignore') : '' ?>>Don't add duplicate to Highrise</option>
-                	</select><br/>
-                	<?php _e('Duplicates are currently detected by email address only.', 'gravity-forms-highrise-crm') ?>
+                	</select>
+                	<p class="description"><?php _e('Duplicates are currently detected by email address only.', 'gravity-forms-highrise-crm') ?></p>
                 </div>
                 <?php /*
                 <div id="highrise_optin_container" valign="top" class="margin_vertical_10">
@@ -740,17 +751,7 @@ class GFHighriseCRM {
 					</script>
 					<?php endif; ?>
                 </div>
-                <?php /* Hide Options for now
-                <div id="highrise_options_container" valign="top" class="margin_vertical_10">
-                    <label for="highrise_options" class="left_header"><?php _e("Options", "gravity-forms-highrise-crm"); ?></label>
-                    <div id="highrise_options">
-                        <table>
-                            <tr><td><input type="checkbox" name="highrise_double_optin" id="highrise_double_optin" value="1" <?php echo rgar($config["meta"],"double_optin") ? "checked='checked'" : "" ?> onclick="var element = jQuery('#highrise_doubleoptin_warning'); if(this.checked){element.hide('slow');} else{element.show('slow');}"/> <?php _e("Double Opt-In" , "gravity-forms-highrise-crm") ?>  <?php gform_tooltip("highrise_double_optin") ?> <br/><span id='highrise_doubleoptin_warning' <?php echo rgar($config["meta"], "double_optin") ? "style='display:none'" : "" ?>>(<?php _e("Abusing this may cause your Highrise account to be suspended.", "gravity-forms-highrise-crm") ?>)</span></td></tr>
-                            <tr><td><input type="checkbox" name="highrise_welcome_email" id="highrise_welcome_email" value="1" <?php echo rgar($config["meta"],"welcome_email") ? "checked='checked'" : "" ?>/> <?php _e("Send Welcome Email" , "gravity-forms-highrise-crm") ?> <?php gform_tooltip("highrise_welcome") ?></td></tr>
-                        </table>
-                    </div>
-                </div>
-                */?>
+
                 <div id="highrise_submit_container" class="margin_vertical_10">
                     <input type="submit" name="gf_highrise_crm_submit" value="<?php echo empty($id) ? __("Save", "gravity-forms-highrise-crm") : __("Update", "gravity-forms-highrise-crm"); ?>" class="button-primary"/>
                     <input type="button" value="<?php _e("Cancel", "gravity-forms-highrise-crm"); ?>" class="button" onclick="javascript:document.location='admin.php?page=gf_highrise'" />
@@ -1269,12 +1270,18 @@ class GFHighriseCRM {
 				$person->save();
 
 				// Highrise was successful, let's make a note
-				$note_txt = sprintf(__('Contact created via form at %s from IP address %s ','gravity-forms-highrise-crm'), $entry['source_url'], $entry['ip']);
-				$note = new HighriseNote($api);
-				$note->setSubjectType("Party");
-				$note->setSubjectId($person->getId());
-				$note->setBody($note_txt);
-				$note->save();
+				if( !empty($feed['meta']['note']) )
+				{	
+					$note_txt = $feed['meta']['note'];
+					$note_txt = str_replace('{ipaddress}', $entry['ip'], $note_txt);
+					$note_txt = str_replace('{formurl}', $entry['source_url'], $note_txt);
+
+					$note = new HighriseNote($api);
+					$note->setSubjectType("Party");
+					$note->setSubjectId($person->getId());
+					$note->setBody($note_txt);
+					$note->save();					
+				}
 
 				self::log_debug("Created contact on Highrise - ID: ".$person->getId());
 			}

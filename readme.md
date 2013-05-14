@@ -1,7 +1,7 @@
 Gravity Forms Highrise CRM
 ==========================
 
-Version 1.0
+Version 1.1
 
 Send your Gravity Forms submissions to Highrise. 
 
@@ -24,6 +24,9 @@ Duplicate entries can either be skipped or added as a duplicate. This option is 
 5. Navigate to Forms->Highrise CRM to setup feeds for the desired forms
 
 ## Changelog
+
+### 1.1
+* Make note optional on Highrise submission, allow for customization
 
 ### 1.0 
 * Code cleanup

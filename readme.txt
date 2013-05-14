@@ -41,6 +41,9 @@ Address (Full) is the field of type Address under Advanced Fields. This field co
 
 == Changelog ==
 
+### 1.1
+* Make note optional on Highrise submission, allow for customization
+
 ### 1.0 
 * Code cleanup
 * Add to WordPress Plugin Repository
