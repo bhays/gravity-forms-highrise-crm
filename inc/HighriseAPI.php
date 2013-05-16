@@ -1804,7 +1804,6 @@ class HighrisePerson extends HighriseAPI
 	public function save()
 	{
 		$person_xml = $this->toXML(false);
-		print_r($person_xml);
 		if ($this->getId() != null)
 		{
 			$new_xml = $this->postDataWithVerb("/people/" . $this->getId() . ".xml?reload=true", $person_xml, "PUT");
