@@ -4,7 +4,7 @@ Donate link:
 Tags: gravity forms, gravityforms, highrise crm, highrise
 Requires at least: 3.3
 Tested up to: 3.5.1
-Stable tag: 1.1
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,10 @@ Address (Full) is the field of type Address under Advanced Fields. This field co
 == Screenshots ==
 
 == Changelog ==
+
+### 1.2
+* Added filter for pre-Highrise submission allowing you to modify any data before it's sent. Use the filter `gf_highrise_crm_pre_submission`
+* Ability to add contact to a Group
 
 ### 1.1
 * Make note optional on Highrise submission, allow for customization

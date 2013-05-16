@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 1.1
+Version: 1.2
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -40,7 +40,7 @@ class GFHighriseCRM {
 	private static $path = "gravity-forms-highrise-crm/gravity-forms-highrise-crm.php";
 	private static $url = "http://www.gravityforms.com";
 	private static $slug = "gravity-forms-highrise-crm";
-	private static $version = "1.1";
+	private static $version = "1.2";
 	private static $min_gravityforms_version = "1.5";
 	private static $supported_fields = array(
 		"checkbox", "radio", "select", "text", "website", "textarea", "email",
@@ -177,6 +177,7 @@ class GFHighriseCRM {
 			"highrise_optin_condition" => "<h6>" . __("Opt-In Condition", "gravity-forms-highrise-crm") . "</h6>" . __("When the opt-in condition is enabled, form submissions will only be exported to Highrise when the condition is met. When disabled all form submissions will be exported.", "gravity-forms-highrise-crm"),
 			"highrise_duplicates" => "<h6>" . __("Duplicate Entires", "gravity-forms-highrise-crm") . "</h6>" . __("When a duplicate entry for Highrise is detected, what should happen?", "gravity-forms-highrise-crm"),
 			"highrise_note" => "<h6>" . __("Add a Note", "gravity-forms-highrise-crm") . "</h6>" . __("Create a custom note to be added to the contact."),
+			"highrise_group" => "<h6>" . __("Add to Group", "gravity-forms-highrise-crm") . "</h6>" . __("Will add the newly created contact to the Group of your choice."),
 		);
 		return array_merge($tooltips, $highrise_tooltips);
 	}
@@ -268,9 +269,9 @@ class GFHighriseCRM {
                 <div class="hr-divider"></div>
 
                 <h3><?php _e("Uninstall Highrise Add-On", "gravity-forms-highrise-crm") ?></h3>
-                <div class="delete-alert"><?php _e("Warning! This operation deletes ALL Highrise CRM Survey Feeds.", "gravity-forms-highrise-crm") ?>
+                <div class="delete-alert"><?php _e("Warning! This operation deletes ALL Highrise CRM Feeds.", "gravity-forms-highrise-crm") ?>
                     <?php
-			$uninstall_button = '<input type="submit" name="uninstall" value="' . __("Uninstall Highrise CRM Add-On", "gravity-forms-highrise-crm") . '" class="button" onclick="return confirm(\'' . __("Warning! ALL Highrise Survey Feeds will be deleted. This cannot be undone. \'OK\' to delete, \'Cancel\' to stop", "gravity-forms-highrise-crm") . '\');"/>';
+			$uninstall_button = '<input type="submit" name="uninstall" value="' . __("Uninstall Highrise CRM Add-On", "gravity-forms-highrise-crm") . '" class="button" onclick="return confirm(\'' . __("Warning! ALL Highrise Feeds will be deleted. This cannot be undone. \'OK\' to delete, \'Cancel\' to stop", "gravity-forms-highrise-crm") . '\');"/>';
 			echo apply_filters("gform_highrise_uninstall_button", $uninstall_button);
 ?>
                 </div>
@@ -557,10 +558,11 @@ class GFHighriseCRM {
 
 		if(!isset($config["meta"]))
 			$config["meta"] = array(
-				'note'=>''
+				'note'  => '',
+				'group' => '',
 			);
 
-		//self::log_debug('Meta: '.print_r($config['meta'], true));
+		self::log_debug('Meta: '.print_r($config['meta'], true));
 
 		// Get details from survey if we have one
 		if (rgempty("contact_type", $config["meta"]))
@@ -610,6 +612,7 @@ class GFHighriseCRM {
 			$config["meta"]["optin_field_id"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_field_id") : "";
 			$config["meta"]["optin_operator"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_operator") : "";
 			$config["meta"]["optin_value"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_value") : "";
+			$config["meta"]["group"] = rgpost("highrise_group");
 			$config["meta"]["duplicates"] = rgpost("highrise_duplicates");
 			$config["meta"]["note"] = rgpost("highrise_note");
 
@@ -665,23 +668,34 @@ class GFHighriseCRM {
 
                     <div id="highrise_field_list">
                     <?php
-		if(!empty($config["form_id"])){
-
-			//getting list of all Highrise details for the selected survey
-			if(empty($details))
-			{
-				$details = self::get_contact_details($config["meta"]["contact_type"]);
-			}
-			//getting field map UI
-			echo self::get_field_mapping($config, $config["form_id"], $details);
-
-			//getting list of selection fields to be used by the optin
-			$form_meta = RGFormsModel::get_form_meta($config["form_id"]);
-		}
-?>
+						if(!empty($config["form_id"])){
+				
+							//getting list of all Highrise details for the selected survey
+							if(empty($details))
+							{
+								$details = self::get_contact_details($config["meta"]["contact_type"]);
+							}
+							//getting field map UI
+							echo self::get_field_mapping($config, $config["form_id"], $details);
+				
+							//getting list of selection fields to be used by the optin
+							$form_meta = RGFormsModel::get_form_meta($config["form_id"]);
+						}
+					?>
                     </div>
                 </div>
-
+                <?php $groups = $api->getGroups(); ?>
+                <?php if( !empty($groups) ): ?>
+                <div class="margin_vertical_10">
+                	<label for="highrise_group" class="left_header"><?php _e("Add to group", "gravity-forms-highrise-crm") ?><?php gform_tooltip("highrise_group") ?></label>
+                	<select name="highrise_group" id="highrise_group">
+	                	<option value=""></option>
+	                	<?php foreach( $groups as $k=>$v ): ?>
+	                	<option value="<?php echo $k ?>" <?php if($config['meta']['group'] == $k): ?>selected<?php endif; ?>><?php echo $v ?></option>
+	                	<?php endforeach; ?>
+                	</select>
+                </div>
+                <?php endif; ?>
 				<div class="margin_vertical_10">
 					<label class="left_header"><?php _e( 'Add a Note', 'gravity-forms-highrise-crm' ); ?> <?php gform_tooltip('highrise_note') ?></label>
 	
@@ -1178,6 +1192,10 @@ class GFHighriseCRM {
 		//self::log_debug('Params: '.print_r($params, true));
 		//self::log_debug('Entry: '.print_r($entry, true));
 		//self::log_debug('Feed: '.print_r($feed, true));
+		
+		$params = apply_filters('gf_highrise_crm_pre_submission', $params);
+		
+		//self::log_debug('Params post filter: '.print_r($params, true));
 
 		// Send info to Highrise
 		if( !empty($params) )
@@ -1263,7 +1281,14 @@ class GFHighriseCRM {
 					}
 				}
 			}
-
+			
+			// Set group if there is one
+			if( !empty($feed['meta']['group']) )
+			{
+				$person->setVisibleTo('NamedGroup');
+				$person->setGroupId($feed['meta']['group']);
+			}
+			
 			try
 			{
 				// Add contact to Highrise
@@ -1368,6 +1393,7 @@ class GFHighriseCRM {
 
 		$api = self::get_api();
 
+		// Add custom fields
 		$custom_fields = $api->getCustomFields();
 
 		if( !empty($custom_fields) )
@@ -1378,6 +1404,7 @@ class GFHighriseCRM {
 				$cf["$k"] = array('name' => $v);
 			}
 		}
+		
 		return $fields + $generic_fields + $cf;
 	}
 

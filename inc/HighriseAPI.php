@@ -159,7 +159,23 @@ class HighriseAPI
 		$ret = array();
 		foreach($xml_object as $foo)
 		{
-			$ret[(string)$foo->id] = (string)$foo ->label;
+			$ret[(string)$foo->id] = (string)$foo->label;
+		}
+		return $ret;
+	}
+
+	/* Custom Fields */
+	public function getGroups()
+	{
+		$xml = $this->getUrl("/groups.xml");
+		$this->checkForErrors("Groups");
+		
+		$xml_object = simplexml_load_string($xml);
+		
+		$ret = array();
+		foreach($xml_object as $foo)
+		{
+			$ret[(string)$foo->id] = (string)$foo->name;
 		}
 		return $ret;
 	}
@@ -1658,7 +1674,6 @@ class HighriseCustomField
 	}		
 }
 
-
 class HighrisePerson extends HighriseAPI
 {
 	public $id;
@@ -1672,13 +1687,12 @@ class HighrisePerson extends HighriseAPI
 	public $company_id;
 	
 	// TODO: public $owner_id;
-	// TODO: public $group_id;
 	public $author_id;
 	public $contact_details;
 	public $visible_to;
-	
+	public $group_id;
+		
 	// contact-data
-	
 	public $email_addresses;
 	public $phone_numbers;
 	public $addresses;
@@ -1790,7 +1804,7 @@ class HighrisePerson extends HighriseAPI
 	public function save()
 	{
 		$person_xml = $this->toXML(false);
-
+		print_r($person_xml);
 		if ($this->getId() != null)
 		{
 			$new_xml = $this->postDataWithVerb("/people/" . $this->getId() . ".xml?reload=true", $person_xml, "PUT");
@@ -1879,7 +1893,6 @@ class HighrisePerson extends HighriseAPI
 		// TODO: Get Company Id
 		$fields = array("title", "first_name", "last_name", "background", "visible_to");
 		
-		
 		if ($this->getId() != null)
 			$xml[] = '<id type="integer">' . $this->getId() . '</id>';
 		
@@ -1899,6 +1912,9 @@ class HighrisePerson extends HighriseAPI
 				$xml[] = "\t<" . $xml_field_name . ">" . $this->$field . "</" . $xml_field_name . ">";
 			}
 		}
+
+		if ($this->group_id)
+			$xml[] = '<group-id type="integer">' . $this->getGroupId() . "</group-id>";
 		
 		$xml[] = "<contact-data>";
 		
@@ -2120,8 +2136,7 @@ class HighrisePerson extends HighriseAPI
 	
 	public function setVisibleTo($visible_to)
 	{
-		$valid_permissions = array("Everyone", "Owner");
-		$visible_to = ucwords(strtolower($visible_to));
+		$valid_permissions = array("Everyone", "Owner", "NamedGroup");
 		if ($visible_to != null && !in_array($visible_to, $valid_permissions))
 			throw new Exception("$visible_to is not a valid visibility permission. Available visibility permissions: " . implode(", ", $valid_permissions));
 		
@@ -2141,6 +2156,16 @@ class HighrisePerson extends HighriseAPI
 	public function getAuthorId()
 	{
 	  return $this->author_id;
+	}
+
+	public function setGroupId($group_id)
+	{
+	  $this->group_id = (integer)$group_id;
+	}
+
+	public function getGroupId()
+	{
+	  return $this->group_id;
 	}
 
 	public function setUpdatedAt($updated_at)
