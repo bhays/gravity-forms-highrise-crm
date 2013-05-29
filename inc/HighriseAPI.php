@@ -2067,7 +2067,7 @@ class HighrisePerson extends HighriseAPI
 		$this->addresses[] = $address;
 	}
 	
-	public function addEmailAddress($address, $location = "Home")
+	public function addEmailAddress($address, $location = "Work")
 	{
 		$item = new HighriseEmailAddress();
 		$item->setAddress($address);
@@ -2076,7 +2076,7 @@ class HighrisePerson extends HighriseAPI
 		$this->email_addresses[] = $item;
 	}
 	
-	public function addPhoneNumber($number, $location = "Home")
+	public function addPhoneNumber($number, $location = "Work")
 	{
 		$item = new HighrisePhoneNumber();
 		$item->setNumber($number);

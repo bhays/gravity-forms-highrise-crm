@@ -1,11 +1,11 @@
 Gravity Forms Highrise CRM
 ==========================
 
-Version 1.2
+Version 2.0
 
 Send your Gravity Forms submissions to Highrise. 
 
-You choose which of your Gravity Forms fieds go where in Highrise. This includes any custom fields you may have setup as well. 
+You choose which of your Gravity Forms fieds go where in Highrise. Select from three types of addresses, websites, emails and all seven types of phones (including pager!). This plugin includes any custom fields you may have setup as well. 
 
 If you'd like to include preset data into a field for Highrise, create a hidden field with the desired value in Gravity Forms.
 
@@ -24,6 +24,12 @@ Duplicate entries can either be skipped or added as a duplicate. This option is 
 5. Navigate to Forms->Highrise CRM to setup feeds for the desired forms
 
 ## Changelog
+
+### 2.0
+* Added more fields for addresses, phones, websites and emails
+* Added tags
+* Added mapped notes
+* Send full country name to Highrise instead of country code
 
 ### 1.2
 * Added filter for pre-Highrise submission allowing you to modify any data before it's sent. Use the filter `gf_highrise_crm_pre_submission`

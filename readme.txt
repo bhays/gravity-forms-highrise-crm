@@ -1,10 +1,10 @@
 === Gravity Forms Highrise CRM ===
 Contributors: benhays
-Donate link: 
+Donate link: http://benjaminhays.com/gf-highrise-donate
 Tags: gravity forms, gravityforms, highrise crm, highrise
 Requires at least: 3.3
 Tested up to: 3.5.1
-Stable tag: 1.2
+Stable tag: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Send your Gravity Forms submissions to Highrise
 
 Send your Gravity Forms submissions to Highrise. 
 
-You choose which of your Gravity Forms fieds go where in Highrise. This includes any custom fields you may have setup as well. 
+You choose which of your Gravity Forms fieds go where in Highrise. Select from three types of addresses, websites, emails and all seven types of phones (including pager!). This plugin includes any custom fields you may have setup as well. 
 
 If you'd like to include preset data into a field for Highrise, create a hidden field with the desired value in Gravity Forms.
 
@@ -29,17 +29,26 @@ Duplicate entries can either be skipped or added as a duplicate. This option is 
 
 == Frequently asked questions ==
 
-= What location is set for my contacts? =
-
-All contacts are currently set to the 'Work' location when being sent to Highrise.
-
 = What is Address (Full)? =
 
 Address (Full) is the field of type Address under Advanced Fields. This field contains all the address information you'll need and makes things much simpler.
 
+= What's the difference between a Mapped Note and Add a Note? =
+
+A mapped note is a note that is created directly from a field on your form. Add a Note is a custom piece of text you can edit.
+
+= How do tags work? =
+
+Create a comma separated list of tags on your form feed, and those tags will be applied to a new contact when it's added to Highrise.
+
 == Screenshots ==
 
 == Changelog ==
+### 2.0
+* Added more fields for addresses, phones, websites and emails
+* Added tags
+* Added mapped notes
+* Send full country name to Highrise instead of country code
 
 ### 1.2
 * Added filter for pre-Highrise submission allowing you to modify any data before it's sent. Use the filter `gf_highrise_crm_pre_submission`

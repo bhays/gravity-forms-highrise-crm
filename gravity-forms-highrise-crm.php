@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 1.2
+Version: 2.0
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -24,12 +24,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-
-TODO:
-
-* Add contact locations as groups, address/phone/email/etc as one block
-* Possibilty of tasks
-
 */
 
 add_action('init',  array('GFHighriseCRM', 'init'));
@@ -40,7 +34,7 @@ class GFHighriseCRM {
 	private static $path = "gravity-forms-highrise-crm/gravity-forms-highrise-crm.php";
 	private static $url = "http://www.gravityforms.com";
 	private static $slug = "gravity-forms-highrise-crm";
-	private static $version = "1.2";
+	private static $version = "2.0";
 	private static $min_gravityforms_version = "1.5";
 	private static $supported_fields = array(
 		"checkbox", "radio", "select", "text", "website", "textarea", "email",
@@ -177,6 +171,7 @@ class GFHighriseCRM {
 			"highrise_optin_condition" => "<h6>" . __("Opt-In Condition", "gravity-forms-highrise-crm") . "</h6>" . __("When the opt-in condition is enabled, form submissions will only be exported to Highrise when the condition is met. When disabled all form submissions will be exported.", "gravity-forms-highrise-crm"),
 			"highrise_duplicates" => "<h6>" . __("Duplicate Entires", "gravity-forms-highrise-crm") . "</h6>" . __("When a duplicate entry for Highrise is detected, what should happen?", "gravity-forms-highrise-crm"),
 			"highrise_note" => "<h6>" . __("Add a Note", "gravity-forms-highrise-crm") . "</h6>" . __("Create a custom note to be added to the contact."),
+			"highrise_tags" => "<h6>" . __("Add some Tags", "gravity-forms-highrise-crm") . "</h6>" . __("Add some tags separated by commas to be added to your contact."),
 			"highrise_group" => "<h6>" . __("Add to Group", "gravity-forms-highrise-crm") . "</h6>" . __("Will add the newly created contact to the Group of your choice."),
 		);
 		return array_merge($tooltips, $highrise_tooltips);
@@ -358,53 +353,37 @@ class GFHighriseCRM {
                     </tfoot>
 
                     <tbody class="list:user user-list">
+					<?php
+					$settings = GFHighriseCRMData::get_feeds();
+					if(is_array($settings) && sizeof($settings) > 0):
+						foreach($settings as $setting): ?>
+                        <tr class='author-self status-inherit' valign="top">
+                            <th scope="row" class="check-column"><input type="checkbox" name="feed[]" value="<?php echo $setting["id"] ?>"/></th>
+                            <td><img src="<?php echo self::get_base_url() ?>/images/active<?php echo intval($setting["is_active"]) ?>.png" alt="<?php echo $setting["is_active"] ? __("Active", "gravity-forms-highrise-crm") : __("Inactive", "gravity-forms-highrise-crm");?>" title="<?php echo $setting["is_active"] ? __("Active", "gravity-forms-highrise-crm") : __("Inactive", "gravity-forms-highrise-crm");?>" onclick="ToggleActive(this, <?php echo $setting['id'] ?>); " /></td>
+                            <td class="column-title">
+                                <a href="admin.php?page=gf_highrise&view=edit&id=<?php echo $setting["id"] ?>" title="<?php _e("Edit", "gravity-forms-highrise-crm") ?>"><?php echo $setting["form_title"] ?></a>
+                                <div class="row-actions">
+                                    <span class="edit"><a href="admin.php?page=gf_highrise&view=edit&id=<?php echo $setting["id"] ?>" title="<?php _e("Edit", "gravity-forms-highrise-crm") ?>"><?php _e("Edit", "gravity-forms-highrise-crm") ?></a> | </span>
+                                    <span class="trash"><a title="<?php _e("Delete", "gravity-forms-highrise-crm") ?>" href="javascript: if(confirm('<?php _e("Delete this feed? ", "gravity-forms-highrise-crm") ?> <?php _e("\'Cancel\' to stop, \'OK\' to delete.", "gravity-forms-highrise-crm") ?>')){ DeleteSetting(<?php echo $setting["id"] ?>);}"><?php _e("Delete", "gravity-forms-highrise-crm")?></a></span>
+                                </div>
+                            </td>
+                            <td class="column-date"><?php echo $setting["meta"]["survey_name"] ?></td>
+                        </tr>
                         <?php
-
-		$settings = GFHighriseCRMData::get_feeds();
-		if(is_array($settings) && sizeof($settings) > 0){
-			foreach($settings as $setting){
-?>
-                                <tr class='author-self status-inherit' valign="top">
-                                    <th scope="row" class="check-column"><input type="checkbox" name="feed[]" value="<?php echo $setting["id"] ?>"/></th>
-                                    <td><img src="<?php echo self::get_base_url() ?>/images/active<?php echo intval($setting["is_active"]) ?>.png" alt="<?php echo $setting["is_active"] ? __("Active", "gravity-forms-highrise-crm") : __("Inactive", "gravity-forms-highrise-crm");?>" title="<?php echo $setting["is_active"] ? __("Active", "gravity-forms-highrise-crm") : __("Inactive", "gravity-forms-highrise-crm");?>" onclick="ToggleActive(this, <?php echo $setting['id'] ?>); " /></td>
-                                    <td class="column-title">
-                                        <a href="admin.php?page=gf_highrise&view=edit&id=<?php echo $setting["id"] ?>" title="<?php _e("Edit", "gravity-forms-highrise-crm") ?>"><?php echo $setting["form_title"] ?></a>
-                                        <div class="row-actions">
-                                            <span class="edit">
-                                            <a href="admin.php?page=gf_highrise&view=edit&id=<?php echo $setting["id"] ?>" title="<?php _e("Edit", "gravity-forms-highrise-crm") ?>"><?php _e("Edit", "gravity-forms-highrise-crm") ?></a>
-                                            |
-                                            </span>
-
-                                            <span class="trash">
-                                            <a title="<?php _e("Delete", "gravity-forms-highrise-crm") ?>" href="javascript: if(confirm('<?php _e("Delete this feed? ", "gravity-forms-highrise-crm") ?> <?php _e("\'Cancel\' to stop, \'OK\' to delete.", "gravity-forms-highrise-crm") ?>')){ DeleteSetting(<?php echo $setting["id"] ?>);}"><?php _e("Delete", "gravity-forms-highrise-crm")?></a>
-
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="column-date"><?php echo $setting["meta"]["survey_name"] ?></td>
-                                </tr>
-                                <?php
-			}
-		}
-		else if(self::get_api()){
-?>
-                            <tr>
-                                <td colspan="4" style="padding:20px;">
-                                    <?php _e(sprintf("You don't have any Highrise CRM feeds configured. Let's go %screate one%s!", '<a href="admin.php?page=gf_highrise&view=edit&id=0">', "</a>"), "gravity-forms-highrise-crm"); ?>
-                                </td>
-                            </tr>
-                            <?php
-			}
-		else{
-?>
-                            <tr>
-                                <td colspan="4" style="padding:20px;">
-                                    <?php _e(sprintf("To get started, please configure your %sHighrise Settings%s.", '<a href="admin.php?page=gf_settings&addon=Highrise">', "</a>"), "gravity-forms-highrise-crm"); ?>
-                                </td>
-                            </tr>
-                            <?php
-		}
-?>
+						endforeach;
+					elseif( self::get_api() ):?>
+						<tr>
+						    <td colspan="4" style="padding:20px;">
+						        <?php _e(sprintf("You don't have any Highrise CRM feeds configured. Let's go %screate one%s!", '<a href="admin.php?page=gf_highrise&view=edit&id=0">', "</a>"), "gravity-forms-highrise-crm"); ?>
+						    </td>
+						</tr>
+					<?php else: ?>
+						<tr>
+						    <td colspan="4" style="padding:20px;">
+						        <?php _e(sprintf("To get started, please configure your %sHighrise Settings%s.", '<a href="admin.php?page=gf_settings&addon=Highrise">', "</a>"), "gravity-forms-highrise-crm"); ?>
+						    </td>
+						</tr>
+					<?php endif; ?>
                     </tbody>
                 </table>
             </form>
@@ -607,14 +586,16 @@ class GFHighriseCRM {
 				}
 			}
 
-			$config["meta"]["field_map"] = $field_map;
-			$config["meta"]["optin_enabled"] = rgpost("highrise_optin_enable") ? true : false;
-			$config["meta"]["optin_field_id"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_field_id") : "";
-			$config["meta"]["optin_operator"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_operator") : "";
-			$config["meta"]["optin_value"] = $config["meta"]["optin_enabled"] ? rgpost("highrise_optin_value") : "";
-			$config["meta"]["group"] = rgpost("highrise_group");
-			$config["meta"]["duplicates"] = rgpost("highrise_duplicates");
-			$config["meta"]["note"] = rgpost("highrise_note");
+			$config['meta']['field_map'] = $field_map;
+			$config['meta']['optin_enabled'] = rgpost('highrise_optin_enable') ? true : false;
+			$config['meta']['optin_field_id'] = $config['meta']['optin_enabled'] ? rgpost('highrise_optin_field_id') : '';
+			$config['meta']['optin_operator'] = $config['meta']['optin_enabled'] ? rgpost('highrise_optin_operator') : '';
+			$config['meta']['optin_value'] = $config['meta']['optin_enabled'] ? rgpost('highrise_optin_value') : '';
+			$config['meta']['group'] = rgpost('highrise_group');
+			$config['meta']['duplicates'] = rgpost('highrise_duplicates');
+			$config['meta']['note'] = rgpost('highrise_note');
+			$config['meta']['tags'] = rgpost('highrise_tags');
+			$config['meta']['advanced_fields'] = rgpost('advanced_fields');
 
 			if($is_valid){
 				$id = GFHighriseCRMData::update_feed($id, $config["form_id"], $config["is_active"], $config["meta"]);
@@ -684,18 +665,13 @@ class GFHighriseCRM {
 					?>
                     </div>
                 </div>
-                <?php $groups = $api->getGroups(); ?>
-                <?php if( !empty($groups) ): ?>
-                <div class="margin_vertical_10">
-                	<label for="highrise_group" class="left_header"><?php _e("Add to group", "gravity-forms-highrise-crm") ?><?php gform_tooltip("highrise_group") ?></label>
-                	<select name="highrise_group" id="highrise_group">
-	                	<option value=""></option>
-	                	<?php foreach( $groups as $k=>$v ): ?>
-	                	<option value="<?php echo $k ?>" <?php if($config['meta']['group'] == $k): ?>selected<?php endif; ?>><?php echo $v ?></option>
-	                	<?php endforeach; ?>
-                	</select>
-                </div>
-                <?php endif; ?>
+				<div class="margin_vertical_10">
+					<label class="left_header"><?php _e( 'Add some Tags', 'gravity-forms-highrise-crm' ); ?> <?php gform_tooltip('highrise_tags') ?></label>
+	
+					<div id="form_fields">
+						<input type="text" name="highrise_tags" value="<?php echo isset($config['meta']['tags']) ? $config['meta']['tags'] : ''; ?>" class="regular-text"/>
+					</div>
+				</div>
 				<div class="margin_vertical_10">
 					<label class="left_header"><?php _e( 'Add a Note', 'gravity-forms-highrise-crm' ); ?> <?php gform_tooltip('highrise_note') ?></label>
 	
@@ -704,6 +680,19 @@ class GFHighriseCRM {
 						<p class="description">Use <em>{formurl}</em> to display the form URL and <em>{ipaddress}</em> to display users IP address. If the field is empty, no note will be sent.</p>
 					</div>
 				</div>
+
+                <?php $groups = $api->getGroups(); ?>
+                <?php if( !empty($groups) ): ?>
+                <div class="margin_vertical_10">
+                	<label for="highrise_group" class="left_header"><?php _e("Add to group", "gravity-forms-highrise-crm") ?><?php gform_tooltip("highrise_group") ?></label>
+                	<select name="highrise_group" id="highrise_group">
+	                	<option value=""></option>
+	                	<?php foreach( $groups as $k=>$v ): ?>
+	                	<option value="<?php echo $k ?>" <?php if(isset($config['meta']['group']) && $config['meta']['group'] == $k): ?>selected<?php endif; ?>><?php echo $v ?></option>
+	                	<?php endforeach; ?>
+                	</select>
+                </div>
+                <?php endif; ?>
 
                 <div id="highrise_duplicate_container" valign="top" class="margin_vertical_10">
                 	<label for="highrise_duplicates" class="left_header"><?php _e("Duplicate entries?", "gravity-forms-highrise-crm") ?><?php gform_tooltip("highrise_duplicates") ?></label>
@@ -760,7 +749,6 @@ class GFHighriseCRM {
                                 var selectedField = "<?php echo str_replace('"', '\"', $config["meta"]["optin_field_id"])?>";
                                 var selectedValue = "<?php echo str_replace('"', '\"', $config["meta"]["optin_value"])?>";
                                 SetOptin(selectedField, selectedValue);
-
                             });
 					</script>
 					<?php endif; ?>
@@ -774,7 +762,6 @@ class GFHighriseCRM {
         </form>
         </div>
         <script type="text/javascript">
-
             function SelectList(listId){
                 if(listId){
                     jQuery("#highrise_form_container").slideDown();
@@ -805,7 +792,7 @@ class GFHighriseCRM {
                 mysack.encVar( "cookie", document.cookie, false );
                 mysack.onError = function() {jQuery("#highrise_wait").hide(); alert('<?php _e("Ajax error while selecting a form", "gravity-forms-highrise-crm") ?>' )};
                 mysack.runAJAX();
-
+				
                 return true;
             }
 
@@ -950,11 +937,8 @@ class GFHighriseCRM {
 
 			    return index >= 0;
 			}
-
         </script>
-
         <?php
-
 	}
 
 	public static function add_permissions(){
@@ -1029,14 +1013,27 @@ class GFHighriseCRM {
 			if( strstr($k, 'hastitle') )
 			{
 				// Display titles
-				$str .= "<tr><td colspan='2'><h4>".$v."</h4></td></tr>";
+				if( is_array($v) )
+				{
+					if( $v['type'] == 'checkbox' )
+					{
+						$checked = !empty($config['meta']['advanced_fields']) ? 'checked="checked"' : '';
+						$str .= '<tr><td class="highrise_field_cell">Advanced Fields</td><td class="highrise_field_cell"><label><input type="checkbox" name="advanced_fields" id="advanced_fields" '.$checked.'/> More fields please...</label></td></tr>';
+					}
+					$str .= "<tr class='".$v['class']."'><td colspan='2'><h4>".$v['name']."</h4></td></tr>";
+				}
+				else
+				{
+					$str .= "<tr><td colspan='2'><h4>".$v."</h4></td></tr>";
+				}
 			}
 			else
 			{
 				$selected_field = rgar($config["meta"]["field_map"], $k);
 				$required = isset($v['required']) ? "<span class='gfield_required'>*</span>" : '';
 				$error_class = isset($v['required']) && empty($selected_field) && !empty($_POST["gf_highrise_crm_submit"]) ? " feeds_validation_error" : "";
-				$str .= "<tr class='$error_class'><td class='highrise_field_cell'>".self::ws_clean($v['name'])." $required</td><td class='highrise_field_cell'>".self::get_mapped_field_list($k, $selected_field, $form_fields)."</td></tr>";
+				$row_class = isset($v['class']) ? $v['class'] : "";
+				$str .= "<tr class='$error_class $row_class'><td class='highrise_field_cell'>".self::ws_clean($v['name'])." $required</td><td class='highrise_field_cell'>".self::get_mapped_field_list($k, $selected_field, $form_fields)."</td></tr>";
 			}
 		}
 
@@ -1084,21 +1081,21 @@ class GFHighriseCRM {
 	}
 
 	private static function get_address($entry, $field_id, $return='string'){
-		$street_value = str_replace("  ", " ", trim($entry[$field_id . ".1"]));
-		$street2_value = str_replace("  ", " ", trim($entry[$field_id . ".2"]));
-		$city_value = str_replace("  ", " ", trim($entry[$field_id . ".3"]));
-		$state_value = str_replace("  ", " ", trim($entry[$field_id . ".4"]));
-		$zip_value = trim($entry[$field_id . ".5"]);
-		$country_value = GFCommon::get_country_code(trim($entry[$field_id . ".6"]));
-
+		$street_value     = str_replace("  ", " ", trim($entry[$field_id.".1"]));
+		$street2_value    = str_replace("  ", " ", trim($entry[$field_id.".2"]));
+		$city_value       = str_replace("  ", " ", trim($entry[$field_id.".3"]));
+		$state_value      = str_replace("  ", " ", trim($entry[$field_id.".4"]));
+		$zip_value        = trim($entry[$field_id . ".5"]);
+		$country_value    = trim($entry[$field_id . ".6"]);
+		
 		if( $return == 'array' )
 		{
 			$address = array(
-				'street' => $street_value.' '.$street2_value,
-				'city' => $city_value,
-				'state' => $state_value,
-				'zip' => $zip_value,
-				'country' => $country_value
+				'street'    => $street_value.' '.$street2_value,
+				'city'      => $city_value,
+				'state'     => $state_value,
+				'zip'       => $zip_value,
+				'country'   => $country_value
 			);
 		}
 		else
@@ -1177,10 +1174,10 @@ class GFHighriseCRM {
 			'contact_type' => $feed['meta']['contact_type'],
 		);
 
-		foreach( $feed['meta']['field_map'] as $k => $v ){
-			$field = RGFormsModel::get_field($form, $v);
-
-			if($v == intval($v) && $k == "address"){
+		foreach( $feed['meta']['field_map'] as $k => $v )
+		{
+			if($v == intval($v) && strpos($k, 'address') !== false )
+			{
 				//handling full address
 				$params[$k] = self::get_address($entry, $v, 'array');
 			}
@@ -1226,33 +1223,18 @@ class GFHighriseCRM {
 
 			foreach( $params as $field => $value )
 			{
-				switch( $field )
+				// Default location
+				$location = 'work';
+
+				// Check for locations appended to field
+				if( strpos($field, ':') )
 				{
-				case 'email':
-					$person->addEmailAddress($value);
-					break;
-				case 'name_first':
-					$person->setFirstName($value);
-					break;
-				case 'name_last':
-					$person->setLastName($value);
-					break;
-				case 'company':
-					$person->setCompanyName($value);
-					break;
-				case 'title':
-					$person->setTitle($value);
-					break;
-				case 'phone':
-					$person->addPhoneNumber($value);
-					break;
-				case 'website':
-					$person->addWebAddress($value);
-					break;
-				case 'twitter':
-					$person->addTwitterAccount($value);
-					break;
-				case 'address':
+					list($field, $location) = explode(':', $field);
+				}
+				
+				// There's probably a better way to do this
+				if( strpos($field, 'address') !== false )
+				{
 					$address = new HighriseAddress();
 
 					if( isset($value['street']) )
@@ -1270,14 +1252,51 @@ class GFHighriseCRM {
 					if( isset($value['country']) )
 						$address->setCountry($value['country']);
 
+					$address->setLocation($location);
 					$person->addAddress($address);
-					break;
-
-				// These should all be custom fields
-				default:
-					if( is_int($field) )
+					
+				}
+				elseif( strpos($field, 'phone') !== false )
+				{
+					$person->addPhoneNumber($value, $location);					
+				}
+				elseif( strpos($field, 'email') !== false )
+				{
+					$person->addEmailAddress($value, $location);
+				}
+				elseif( strpos($field, 'website') !== false )
+				{
+					$person->addWebAddress($value, $location);
+				}
+				else
+				{
+					switch( $field )
 					{
-						$person->addCustomField($field, $value);
+						case 'name_first':
+							$person->setFirstName($value);
+							break;
+						case 'name_last':
+							$person->setLastName($value);
+							break;
+						case 'company':
+							$person->setCompanyName($value);
+							break;
+						case 'title':
+							$person->setTitle($value);
+							break;
+						case 'twitter':
+							$person->addTwitterAccount($value);
+							break;
+						case 'note_1': case 'note_2': case 'note_3':
+							// Note needs to be inserted after people creation, so save for later
+							$custom_note[] = $value;
+							break;
+						// These should all be custom fields
+						default:
+							if( is_int($field) )
+							{
+								$person->addCustomField($field, $value);
+							}
 					}
 				}
 			}
@@ -1289,11 +1308,22 @@ class GFHighriseCRM {
 				$person->setGroupId($feed['meta']['group']);
 			}
 			
+			// Add tags if there are any
+			if( !empty($feed['meta']['tags']) )
+			{
+				$tags = explode(',', $feed['meta']['tags']);
+				foreach( $tags as $t )
+				{
+					$person->addTag(trim($t));
+				}
+			}
+			
 			try
 			{
 				// Add contact to Highrise
 				$person->save();
-
+				$id = $person->getId();
+				
 				// Highrise was successful, let's make a note
 				if( !empty($feed['meta']['note']) )
 				{	
@@ -1303,9 +1333,22 @@ class GFHighriseCRM {
 
 					$note = new HighriseNote($api);
 					$note->setSubjectType("Party");
-					$note->setSubjectId($person->getId());
+					$note->setSubjectId($id);
 					$note->setBody($note_txt);
 					$note->save();					
+				}
+				
+				// Add custom note
+				if( isset($custom_note) && is_array($custom_note) )
+				{
+					foreach( $custom_note as $n )
+					{
+						$note = new HighriseNote($api);
+						$note->setSubjectType("Party");
+						$note->setSubjectId($id);
+						$note->setBody($n);
+						$note->save();
+					}
 				}
 
 				self::log_debug("Created contact on Highrise - ID: ".$person->getId());
@@ -1362,34 +1405,40 @@ class GFHighriseCRM {
 		$fields = array();
 		$cf = array();
 
-		$generic_fields = array(
-			'phone' => array('name' => 'Phone'),
-			'email' => array('name' => 'Email'),
-			'address' => array('name' => 'Address (Full)'),
-			/*
-			'address_street' => array('name' => 'Street Address'),
-			'address_city' => array('name' => 'City'),
-			'address_state' => array('name' => 'State'),
-			'address_zip' => array('name' => 'Zip'),
-			'address_country' => array('name' => 'Country'),
-			*/
-			'website' => array('name' => 'Website'),
-			//'im' => array('name' => 'Instant Messenger'),
-			//'linkedin' => array('name' => 'LinkedIn'),
-			'twitter' => array('name' => 'Twitter'),
-		);
-
 		if( $type == 'company' )
 		{
 			$fields['company'] = array('name'=>'Company', 'required'=>TRUE);
 
 		} else {
 
-			$fields['name_first'] = array('name'=>'First Name', 'required'=>TRUE);
-			$fields['name_last'] = array('name'=>'Last Name', 'required'=>TRUE);
-			$fields['company'] = array('name'=>'Company');
-			$fields['title'] = array('name'=>'Title');
+			$fields['name_first'] = array('name' => 'First Name', 'required'=>TRUE);
+			$fields['name_last']  = array('name' => 'Last Name', 'required'=>TRUE);
+			$fields['company']    = array('name' => 'Company');
+			$fields['title']      = array('name' => 'Title');
 		}
+
+		$generic_fields = array(
+			'address'            => array('name' => 'Work Address (Full)'),
+			'address:home'       => array('name' => 'Home Address (Full)'),
+			'address:other'      => array('name' => 'Other Address (Full)'),
+			'phone'              => array('name' => 'Phone (work)'),
+			'phone:home'         => array('name' => 'Phone (home)'),
+			'phone:mobile'       => array('name' => 'Phone (mobile)'),
+			'phone:fax'          => array('name' => 'Phone (fax)'),
+			'phone:pager'        => array('name' => 'Phone (pager)'),
+			'phone:skype'        => array('name' => 'Phone (skype)'),
+			'phone:other'        => array('name' => 'Phone (other)'),
+			'email'              => array('name' => 'Email (work)'),
+			'email:home'         => array('name' => 'Email (home)'),
+			'email:other'        => array('name' => 'Email (other)'), 			
+			'website'            => array('name' => 'Website (work)'),
+			'website:personal'   => array('name' => 'Website (personal)'),
+			'website:other'      => array('name' => 'Website (other)'), 			
+			'twitter'            => array('name' => 'Twitter'),
+		);
+		
+		$advanced_fields = array(
+		);
 
 		$api = self::get_api();
 
@@ -1405,7 +1454,15 @@ class GFHighriseCRM {
 			}
 		}
 		
-		return $fields + $generic_fields + $cf;
+		// Add note and tags
+		$eratta = array(
+			'hastitle_errata' => "Mapped Notes",
+			'note_1' => array('name'=>'Note One'),
+			'note_2' => array('name'=>'Note Two'),
+			'note_3' => array('name'=>'Note Three'),
+		);
+		
+		return $fields + $generic_fields + $advanced_fields + $cf + $eratta;
 	}
 
 	private static function is_gravityforms_installed(){
