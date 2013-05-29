@@ -541,7 +541,7 @@ class GFHighriseCRM {
 				'group' => '',
 			);
 
-		self::log_debug('Meta: '.print_r($config['meta'], true));
+		//self::log_debug('Meta: '.print_r($config['meta'], true));
 
 		// Get details from survey if we have one
 		if (rgempty("contact_type", $config["meta"]))
