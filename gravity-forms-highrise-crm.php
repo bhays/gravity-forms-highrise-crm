@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 2.0
+Version: 2.0.1
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -34,7 +34,7 @@ class GFHighriseCRM {
 	private static $path = "gravity-forms-highrise-crm/gravity-forms-highrise-crm.php";
 	private static $url = "http://www.gravityforms.com";
 	private static $slug = "gravity-forms-highrise-crm";
-	private static $version = "2.0";
+	private static $version = "2.0.1";
 	private static $min_gravityforms_version = "1.5";
 	private static $supported_fields = array(
 		"checkbox", "radio", "select", "text", "website", "textarea", "email",
@@ -650,7 +650,7 @@ class GFHighriseCRM {
                     <div id="highrise_field_list">
                     <?php
 						if(!empty($config["form_id"])){
-				
+
 							//getting list of all Highrise details for the selected survey
 							if(empty($details))
 							{
@@ -658,7 +658,7 @@ class GFHighriseCRM {
 							}
 							//getting field map UI
 							echo self::get_field_mapping($config, $config["form_id"], $details);
-				
+
 							//getting list of selection fields to be used by the optin
 							$form_meta = RGFormsModel::get_form_meta($config["form_id"]);
 						}
@@ -667,14 +667,14 @@ class GFHighriseCRM {
                 </div>
 				<div class="margin_vertical_10">
 					<label class="left_header"><?php _e( 'Add some Tags', 'gravity-forms-highrise-crm' ); ?> <?php gform_tooltip('highrise_tags') ?></label>
-	
+
 					<div id="form_fields">
 						<input type="text" name="highrise_tags" value="<?php echo isset($config['meta']['tags']) ? $config['meta']['tags'] : ''; ?>" class="regular-text"/>
 					</div>
 				</div>
 				<div class="margin_vertical_10">
 					<label class="left_header"><?php _e( 'Add a Note', 'gravity-forms-highrise-crm' ); ?> <?php gform_tooltip('highrise_note') ?></label>
-	
+
 					<div id="form_fields">
 						<input type="text" name="highrise_note" value="<?php echo isset($config['meta']['note']) ? $config['meta']['note'] : ''; ?>" class="regular-text"/>
 						<p class="description">Use <em>{formurl}</em> to display the form URL and <em>{ipaddress}</em> to display users IP address. If the field is empty, no note will be sent.</p>
@@ -792,7 +792,7 @@ class GFHighriseCRM {
                 mysack.encVar( "cookie", document.cookie, false );
                 mysack.onError = function() {jQuery("#highrise_wait").hide(); alert('<?php _e("Ajax error while selecting a form", "gravity-forms-highrise-crm") ?>' )};
                 mysack.runAJAX();
-				
+
                 return true;
             }
 
@@ -1087,7 +1087,7 @@ class GFHighriseCRM {
 		$state_value      = str_replace("  ", " ", trim($entry[$field_id.".4"]));
 		$zip_value        = trim($entry[$field_id . ".5"]);
 		$country_value    = trim($entry[$field_id . ".6"]);
-		
+
 		if( $return == 'array' )
 		{
 			$address = array(
@@ -1189,9 +1189,9 @@ class GFHighriseCRM {
 		//self::log_debug('Params: '.print_r($params, true));
 		//self::log_debug('Entry: '.print_r($entry, true));
 		//self::log_debug('Feed: '.print_r($feed, true));
-		
+
 		$params = apply_filters('gf_highrise_crm_pre_submission', $params);
-		
+
 		//self::log_debug('Params post filter: '.print_r($params, true));
 
 		// Send info to Highrise
@@ -1204,20 +1204,26 @@ class GFHighriseCRM {
 			$person->setCreatedAt($current_time);
 
 			// Check for duplicate
-			if( !empty($params['email']) )
+			$email_checks = array('email', 'email:home', 'email:other');
+			foreach( $email_checks as $email )
 			{
-				$user = $person->findPeopleByEmail($params['email']);
-				if( !empty($user) && array_key_exists(0, $user) )
+				if( !empty($params[$email]) )
 				{
-					// Found duplicate, what should we do?
-					if( $feed['meta']['duplicates'] == 'ignore' )
+					$user = $person->findPeopleByEmail($params[$email]);
+
+					if( !empty($user) && array_key_exists(0, $user) )
 					{
-						self::log_debug('Duplicate ignored and not sent to Highrise');
-						return false;
+						// Found duplicate, what should we do?
+						if( $feed['meta']['duplicates'] == 'ignore' )
+						{
+							self::log_debug('Duplicate found, entry ignored and not sent to Highrise');
+							return false;
+						}
+						//$user = $user[0];
+						//$person->setId($user->id);
+						//$person->setUpdatedAt($current_time);
 					}
-					//$user = $user[0];
-					//$person->setId($user->id);
-					//$person->setUpdatedAt($current_time);
+
 				}
 			}
 
@@ -1231,7 +1237,7 @@ class GFHighriseCRM {
 				{
 					list($field, $location) = explode(':', $field);
 				}
-				
+
 				// There's probably a better way to do this
 				if( strpos($field, 'address') !== false )
 				{
@@ -1254,11 +1260,11 @@ class GFHighriseCRM {
 
 					$address->setLocation($location);
 					$person->addAddress($address);
-					
+
 				}
 				elseif( strpos($field, 'phone') !== false )
 				{
-					$person->addPhoneNumber($value, $location);					
+					$person->addPhoneNumber($value, $location);
 				}
 				elseif( strpos($field, 'email') !== false )
 				{
@@ -1300,14 +1306,14 @@ class GFHighriseCRM {
 					}
 				}
 			}
-			
+
 			// Set group if there is one
 			if( !empty($feed['meta']['group']) )
 			{
 				$person->setVisibleTo('NamedGroup');
 				$person->setGroupId($feed['meta']['group']);
 			}
-			
+
 			// Add tags if there are any
 			if( !empty($feed['meta']['tags']) )
 			{
@@ -1317,16 +1323,16 @@ class GFHighriseCRM {
 					$person->addTag(trim($t));
 				}
 			}
-			
+
 			try
 			{
 				// Add contact to Highrise
 				$person->save();
 				$id = $person->getId();
-				
+
 				// Highrise was successful, let's make a note
 				if( !empty($feed['meta']['note']) )
-				{	
+				{
 					$note_txt = $feed['meta']['note'];
 					$note_txt = str_replace('{ipaddress}', $entry['ip'], $note_txt);
 					$note_txt = str_replace('{formurl}', $entry['source_url'], $note_txt);
@@ -1335,9 +1341,9 @@ class GFHighriseCRM {
 					$note->setSubjectType("Party");
 					$note->setSubjectId($id);
 					$note->setBody($note_txt);
-					$note->save();					
+					$note->save();
 				}
-				
+
 				// Add custom note
 				if( isset($custom_note) && is_array($custom_note) )
 				{
@@ -1430,13 +1436,13 @@ class GFHighriseCRM {
 			'phone:other'        => array('name' => 'Phone (other)'),
 			'email'              => array('name' => 'Email (work)'),
 			'email:home'         => array('name' => 'Email (home)'),
-			'email:other'        => array('name' => 'Email (other)'), 			
+			'email:other'        => array('name' => 'Email (other)'),
 			'website'            => array('name' => 'Website (work)'),
 			'website:personal'   => array('name' => 'Website (personal)'),
-			'website:other'      => array('name' => 'Website (other)'), 			
+			'website:other'      => array('name' => 'Website (other)'),
 			'twitter'            => array('name' => 'Twitter'),
 		);
-		
+
 		$advanced_fields = array(
 		);
 
@@ -1453,7 +1459,7 @@ class GFHighriseCRM {
 				$cf["$k"] = array('name' => $v);
 			}
 		}
-		
+
 		// Add note and tags
 		$eratta = array(
 			'hastitle_errata' => "Mapped Notes",
@@ -1461,7 +1467,7 @@ class GFHighriseCRM {
 			'note_2' => array('name'=>'Note Two'),
 			'note_3' => array('name'=>'Note Three'),
 		);
-		
+
 		return $fields + $generic_fields + $advanced_fields + $cf + $eratta;
 	}
 

@@ -4,7 +4,7 @@ Donate link: http://benjaminhays.com/gf-highrise-donate
 Tags: gravity forms, gravityforms, highrise crm, highrise
 Requires at least: 3.3
 Tested up to: 3.5.1
-Stable tag: 2.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,9 +12,9 @@ Send your Gravity Forms submissions to Highrise
 
 == Description ==
 
-Send your Gravity Forms submissions to Highrise. 
+Send your Gravity Forms submissions to Highrise.
 
-You choose which of your Gravity Forms fieds go where in Highrise. Select from three types of addresses, websites, emails and all seven types of phones (including pager!). This plugin includes any custom fields you may have setup as well. 
+You choose which of your Gravity Forms fieds go where in Highrise. Select from three types of addresses, websites, emails and all seven types of phones (including pager!). This plugin includes any custom fields you may have setup as well.
 
 If you'd like to include preset data into a field for Highrise, create a hidden field with the desired value in Gravity Forms.
 
@@ -44,6 +44,10 @@ Create a comma separated list of tags on your form feed, and those tags will be 
 == Screenshots ==
 
 == Changelog ==
+
+### 2.0.1
+* Duplicate check now works for all email types, not just work
+
 ### 2.0
 * Added more fields for addresses, phones, websites and emails
 * Added tags
@@ -57,7 +61,7 @@ Create a comma separated list of tags on your form feed, and those tags will be 
 ### 1.1
 * Make note optional on Highrise submission, allow for customization
 
-### 1.0 
+### 1.0
 * Code cleanup
 * Add to WordPress Plugin Repository
 

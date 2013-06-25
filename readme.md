@@ -1,11 +1,11 @@
 Gravity Forms Highrise CRM
 ==========================
 
-Version 2.0
+Version 2.0.1
 
-Send your Gravity Forms submissions to Highrise. 
+Send your Gravity Forms submissions to Highrise.
 
-You choose which of your Gravity Forms fieds go where in Highrise. Select from three types of addresses, websites, emails and all seven types of phones (including pager!). This plugin includes any custom fields you may have setup as well. 
+You choose which of your Gravity Forms fieds go where in Highrise. Select from three types of addresses, websites, emails and all seven types of phones (including pager!). This plugin includes any custom fields you may have setup as well.
 
 If you'd like to include preset data into a field for Highrise, create a hidden field with the desired value in Gravity Forms.
 
@@ -25,6 +25,9 @@ Duplicate entries can either be skipped or added as a duplicate. This option is 
 
 ## Changelog
 
+### 2.0.1
+* Duplicate check now works for all email types, not just work
+
 ### 2.0
 * Added more fields for addresses, phones, websites and emails
 * Added tags
@@ -38,7 +41,7 @@ Duplicate entries can either be skipped or added as a duplicate. This option is 
 ### 1.1
 * Make note optional on Highrise submission, allow for customization
 
-### 1.0 
+### 1.0
 * Code cleanup
 * Add to WordPress Plugin Repository
 
@@ -46,7 +49,7 @@ Duplicate entries can either be skipped or added as a duplicate. This option is 
 * Added note for contact creation in Highrise
 * Found a much cooler version number
 
-### 0.1 
+### 0.1
 * Initial release
 
 ## License
