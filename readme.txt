@@ -4,7 +4,7 @@ Donate link: http://benjaminhays.com/gf-highrise-donate
 Tags: gravity forms, gravityforms, highrise crm, highrise
 Requires at least: 3.3
 Tested up to: 3.5.1
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,9 @@ Create a comma separated list of tags on your form feed, and those tags will be 
 == Screenshots ==
 
 == Changelog ==
+
+### 2.0.2
+* Fixed changelog display errors when viewing details
 
 ### 2.0.1
 * Duplicate check now works for all email types, not just work
