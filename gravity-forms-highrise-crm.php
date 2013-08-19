@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 2.0.2
+Version: 2.0.3
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -34,7 +34,7 @@ class GFHighriseCRM {
 	private static $path = "gravity-forms-highrise-crm/gravity-forms-highrise-crm.php";
 	private static $url = "http://www.gravityforms.com";
 	private static $slug = "gravity-forms-highrise-crm";
-	private static $version = "2.0.2";
+	private static $version = "2.0.3";
 	private static $min_gravityforms_version = "1.5";
 	private static $supported_fields = array(
 		"checkbox", "radio", "select", "text", "website", "textarea", "email",
@@ -817,19 +817,33 @@ class GFHighriseCRM {
                     for(var i in groups)
                         SetGroupCondition(groups[i]["main"], groups[i]["sub"],"","");
 
-                    //initializing highrise group tooltip
-                    jQuery('.tooltip_highrise_groups').qtip({
-                         content: jQuery('.tooltip_highrise_groups').attr('tooltip'), // Use the tooltip attribute of the element for the content
-                         show: { delay: 500, solo: true },
-                         hide: { when: 'mouseout', fixed: true, delay: 200, effect: 'fade' },
-                         style: "gformsstyle",
-                         position: {
-                          corner: {
-                               target: "topRight",
-                               tooltip: "bottomLeft"
-                               }
-                          }
-                      });
+                    // Two tooltips now for GF 1.7.7 updates
+                    // qtip will be removed soon
+					if( jQuery.fn.tooltip )
+					{
+	                    jQuery( '.tooltip_wysija_groups' ).tooltip({
+	                        show: 500,
+	                        hide: 1000,
+	                        content: function () {
+	                            return jQuery(this).prop('title');
+	                        }
+	                    });
+					}
+
+					if( jQuery.fn.qtip ){
+	                    jQuery('.tooltip_wysija_groups').qtip({
+	                         content: jQuery('.tooltip_wysija_groups').attr('tooltip'), // Use the tooltip attribute of the element for the content
+	                         show: { delay: 500, solo: true },
+	                         hide: { when: 'mouseout', fixed: true, delay: 200, effect: 'fade' },
+	                         style: "gformsstyle",
+	                         position: {
+	                          corner: {
+	                               target: "topRight",
+	                               tooltip: "bottomLeft"
+	                               }
+	                          }
+	                      });
+					}
 
                     jQuery("#highrise_field_group").slideDown();
 
