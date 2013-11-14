@@ -120,13 +120,15 @@ class GFHighriseCRM {
 	}
 
 	public static function check_update($update_plugins_option){
-		if ( get_option( 'gf_highrise_crm_version' ) != self::$version ) {
-			require_once( 'inc/data.php' );
-			GFHighriseCRMData::update_table();
-		}
+        
+        if ( get_option( 'gf_highrise_crm_version' ) != self::$version ) {
+            require_once( 'inc/data.php' );
+            GFHighriseCRMData::update_table();
+            update_option( 'gf_highrise_crm_version', self::$version );
+        }
 
-		update_option( 'gf_highrise_crm_version', self::$version );
-	}
+        return $update_plugins_option;
+    }
 
 	private static function get_key(){
 		if(self::is_gravityforms_supported())
