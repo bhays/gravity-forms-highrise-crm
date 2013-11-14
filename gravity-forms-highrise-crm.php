@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 2.0.3
+Version: 2.1
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -34,7 +34,7 @@ class GFHighriseCRM {
 	private static $path = "gravity-forms-highrise-crm/gravity-forms-highrise-crm.php";
 	private static $url = "http://www.gravityforms.com";
 	private static $slug = "gravity-forms-highrise-crm";
-	private static $version = "2.0.3";
+	private static $version = "2.1";
 	private static $min_gravityforms_version = "1.5";
 	private static $supported_fields = array(
 		"checkbox", "radio", "select", "text", "website", "textarea", "email",
@@ -120,7 +120,7 @@ class GFHighriseCRM {
 	}
 
 	public static function check_update($update_plugins_option){
-        
+
         if ( get_option( 'gf_highrise_crm_version' ) != self::$version ) {
             require_once( 'inc/data.php' );
             GFHighriseCRMData::update_table();
