@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Highrise CRM
 Plugin URI: https://github.com/bhays/gravity-forms-highrise-crm
 Description: Integrates Gravity Forms with Highrise CRM allowing form submissions to be automatically sent to your Highrise account
-Version: 2.1
+Version: 2.2
 Author: Ben Hays
 Author URI: http://benhays.com
 
@@ -162,6 +162,7 @@ class GFHighriseCRM {
 			"highrise_map_fields" => "<h6>" . __("Map Fields", "gravity-forms-highrise-crm") . "</h6>" . __("Associate your Highrise fields to the appropriate Gravity Form fields by selecting.", "gravity-forms-highrise-crm"),
 			"highrise_optin_condition" => "<h6>" . __("Opt-In Condition", "gravity-forms-highrise-crm") . "</h6>" . __("When the opt-in condition is enabled, form submissions will only be exported to Highrise when the condition is met. When disabled all form submissions will be exported.", "gravity-forms-highrise-crm"),
 			"highrise_duplicates" => "<h6>" . __("Duplicate Entires", "gravity-forms-highrise-crm") . "</h6>" . __("When a duplicate entry for Highrise is detected, what should happen?", "gravity-forms-highrise-crm"),
+			"highrise_splitname" => "<h6>" . __("Split First Name", "gravity-forms-highrise-crm") . "</h6>" . __("When using only a single name field, split the value into first and last before submitting to Highrise.", "gravity-forms-highrise-crm"),
 			"highrise_note" => "<h6>" . __("Add a Note", "gravity-forms-highrise-crm") . "</h6>" . __("Create a custom note to be added to the contact."),
 			"highrise_tags" => "<h6>" . __("Add some Tags", "gravity-forms-highrise-crm") . "</h6>" . __("Add some tags separated by commas to be added to your contact."),
 			"highrise_group" => "<h6>" . __("Add to Group", "gravity-forms-highrise-crm") . "</h6>" . __("Will add the newly created contact to the Group of your choice."),
@@ -585,6 +586,7 @@ class GFHighriseCRM {
 			$config['meta']['optin_value'] = $config['meta']['optin_enabled'] ? rgpost('highrise_optin_value') : '';
 			$config['meta']['group'] = rgpost('highrise_group');
 			$config['meta']['duplicates'] = rgpost('highrise_duplicates');
+			$config['meta']['splitname'] = rgpost('highrise_splitname');
 			$config['meta']['note'] = rgpost('highrise_note');
 			$config['meta']['tags'] = rgpost('highrise_tags');
 			$config['meta']['advanced_fields'] = rgpost('advanced_fields');
@@ -689,11 +691,21 @@ class GFHighriseCRM {
                 <div id="highrise_duplicate_container" valign="top" class="margin_vertical_10">
                 	<label for="highrise_duplicates" class="left_header"><?php _e("Duplicate entries?", "gravity-forms-highrise-crm") ?><?php gform_tooltip("highrise_duplicates") ?></label>
                 	<select name="highrise_duplicates" id="highrise_duplicates">
-                		<option value="dupe" <?php echo 'selected' ? (isset($config['meta']['duplicates']) &&$config['meta']['duplicates'] == 'dupe') : '' ?>>Add duplicate anyways, and I'll deal with it in Highrise</option>
-	                	<option value="ignore" <?php echo 'selected' ? (isset($config['meta']['duplicates']) &&$config['meta']['duplicates'] == 'ignore') : '' ?>>Don't add duplicate to Highrise</option>
+                		<option value="dupe" <?php echo (isset($config['meta']['duplicates']) &&$config['meta']['duplicates'] == 'dupe') ? 'selected' : '' ?>>Add duplicate anyways, and I'll deal with it in Highrise</option>
+	                	<option value="ignore" <?php echo (isset($config['meta']['duplicates']) &&$config['meta']['duplicates'] == 'ignore') ? 'selected' : '' ?>>Don't add duplicate to Highrise</option>
                 	</select>
                 	<p class="description"><?php _e('Duplicates are currently detected by email address only.', 'gravity-forms-highrise-crm') ?></p>
                 </div>
+
+                <div id="highrise_splitname_container" valign="top" class="margin_vertical_10">
+                	<label for="highrise_splitname" class="left_header"><?php _e("Split first name?", "gravity-forms-highrise-crm") ?><?php gform_tooltip("highrise_splitname") ?></label>
+                	<select name="highrise_splitname" id="highrise_splitname">
+                		<option value="yes" <?php echo (isset($config['meta']['splitname']) &&$config['meta']['splitname'] == 'yes') ? 'selected' : '' ?>>Split first name field into first & last</option>
+	                	<option value="no" <?php echo (isset($config['meta']['splitname']) &&$config['meta']['splitname'] == 'no') ? 'selected' : '' ?>>Add to Highrise as a single field</option>
+                	</select>
+                	<p class="description"><?php _e('If using a single name field, split the submission before it is sent to Highrise. This will be ignored if last name is set above.', 'gravity-forms-highrise-crm') ?></p>
+                </div>
+
                 <?php /*
                 <div id="highrise_optin_container" valign="top" class="margin_vertical_10">
                     <label for="highrise_optin" class="left_header"><?php _e("Opt-In Condition", "gravity-forms-highrise-crm"); ?> <?php gform_tooltip("highrise_optin_condition") ?></label>
@@ -1196,6 +1208,15 @@ class GFHighriseCRM {
 		//self::log_debug('Entry: '.print_r($entry, true));
 		//self::log_debug('Feed: '.print_r($feed, true));
 
+		// Split firstname if option is set
+		if( $feed['meta']['splitname'] == 'yes' && empty($params['name_last']) )
+		{
+			self::log_debug('Splitting name before sending to Highrise');
+			preg_match('#^(\w+\.)?\s*([\'\’\w]+)\s+([\'\’\w]+)\s*(\w+\.?)?$#', $params['name_first'], $name);
+			$params['name_first'] = $name[2];
+			$params['name_last'] = $name[3];
+		}
+
 		$params = apply_filters('gf_highrise_crm_pre_submission', $params);
 
 		//self::log_debug('Params post filter: '.print_r($params, true));
@@ -1424,7 +1445,7 @@ class GFHighriseCRM {
 		} else {
 
 			$fields['name_first'] = array('name' => 'First Name', 'required'=>TRUE);
-			$fields['name_last']  = array('name' => 'Last Name', 'required'=>TRUE);
+			$fields['name_last']  = array('name' => 'Last Name');
 			$fields['company']    = array('name' => 'Company');
 			$fields['title']      = array('name' => 'Title');
 		}
